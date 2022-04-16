@@ -45,6 +45,9 @@
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
+uint16_t raw_adc_value;
+float voltage = 3.3;
+int adc_res = 4096;
 
 /* USER CODE END PV */
 
@@ -54,6 +57,9 @@ static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_ADC1_Init(void);
 /* USER CODE BEGIN PFP */
+static float getVoltageFromAdc(uint16_t *value){
+	return (*value * voltage) / adc_res;
+}
 
 /* USER CODE END PFP */
 
@@ -69,8 +75,7 @@ static void MX_ADC1_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	uint16_t raw;
-	char msg[10];
+
 
   /* USER CODE END 1 */
 
@@ -102,23 +107,37 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  // Aufgabe 01
 	  //HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
 	  //HAL_Delay(3600);
 
-	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, GPIO_PIN_SET);
+
+
 	  HAL_ADC_Start(&hadc1);
 	  HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
-	  raw = HAL_ADC_GetValue(&hadc1);
+	  raw_adc_value = HAL_ADC_GetValue(&hadc1);
 
-	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, GPIO_PIN_RESET);
+	  if(raw_adc_value > (adc_res/2) && HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5)==GPIO_PIN_RESET){
+		  printf("GPIO_PIN_5 was enabled! \n");
+		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
+		  printf("adc_value == %d \n\r", raw_adc_value);
+		  printf("adc_voltage == %f \n\r", getVoltageFromAdc(&raw_adc_value));
+	  }
 
-	  sprintf(msg, "%hu\r\n", raw);
+	  else if(raw_adc_value <= (adc_res/2) && HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5)!=GPIO_PIN_RESET)
+	  {
+		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
+		  printf("adc_value == %d \n\r", raw_adc_value);
+		  printf("adc_voltage == %f \n\r", getVoltageFromAdc(&raw_adc_value));
+	  }
 
-	  HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
-	  HAL_Delay(1);
+
+
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+
   }
   /* USER CODE END 3 */
 }
@@ -313,6 +332,23 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+int __io_putchar(int ch)
+	  {
+	   uint8_t c[1];
+	   c[0] = ch & 0x00FF;
+	   HAL_UART_Transmit(&huart2, &*c, 1, 10);
+	   return ch;
+	  }
+
+	  int _write(int file,char *ptr, int len)
+	  {
+	   int DataIdx;
+	   for(DataIdx= 0; DataIdx< len; DataIdx++)
+	   {
+	   __io_putchar(*ptr++);
+	   }
+	  return len;
+	  }
 
 /* USER CODE END 4 */
 
