@@ -160,10 +160,12 @@ int main(void)
 
 	  if(arithmeticADC > (adc_res/2) && HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5) == GPIO_PIN_RESET){
 		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
+		  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_SET);
 	  }
 	  else if(arithmeticADC <= (adc_res/2) && HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5) != GPIO_PIN_RESET)
 	  {
 		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
+		  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_RESET);
 	  }
 
 	  printf("adc_value == %d \n\r", raw_adc_value);
