@@ -23,6 +23,7 @@
 /* USER CODE BEGIN Includes */
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -40,14 +41,20 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
- ADC_HandleTypeDef hadc1;
+ADC_HandleTypeDef hadc1;
 
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 uint16_t raw_adc_value;
-float voltage = 3.3;
+float voltage = 3.3f;
 int adc_res = 4096;
+uint16_t sumADCRaw;
+int arithmeticADC;
+int const cycle = 4;
+int counter = 1;
+uint16_t *adcContainer;
+
 
 /* USER CODE END PV */
 
@@ -57,9 +64,35 @@ static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_ADC1_Init(void);
 /* USER CODE BEGIN PFP */
-static float getVoltageFromAdc(uint16_t *value){
+float getVoltageFromAdc(uint16_t *value){
 	return (*value * voltage) / adc_res;
 }
+
+int getArithmeticADCValue(uint16_t *adc_raw){
+
+	if(counter > cycle){
+		sumADCRaw += *adc_raw - adcContainer[(counter-(cycle+1)) % cycle];
+	}
+	else{
+		sumADCRaw += *adc_raw;
+	}
+
+	adcContainer[(counter-1)%cycle] = *adc_raw;
+	counter++;
+
+	if(counter > cycle){
+		return sumADCRaw * 1/cycle;
+	}
+	else{
+		return sumADCRaw * 1/(counter-1);
+	}
+
+}
+
+void initADCValueContainer(){
+	adcContainer = malloc(sizeof(uint16_t)*cycle);
+}
+
 
 /* USER CODE END PFP */
 
@@ -74,8 +107,9 @@ static float getVoltageFromAdc(uint16_t *value){
   */
 int main(void)
 {
-  /* USER CODE BEGIN 1 */
 
+
+  /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
 
@@ -101,6 +135,8 @@ int main(void)
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
 
+  initADCValueContainer();
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -109,27 +145,31 @@ int main(void)
   {
 	  // Aufgabe 01
 	  //HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-	  //HAL_Delay(3600);
+	  //HAL_Delay(1000);
+
+
 
 
 
 	  HAL_ADC_Start(&hadc1);
 	  HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
 	  raw_adc_value = HAL_ADC_GetValue(&hadc1);
+	  getVoltageFromAdc(&raw_adc_value);
+	  arithmeticADC = getArithmeticADCValue(&raw_adc_value);
 
-	  if(raw_adc_value > (adc_res/2) && HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5)==GPIO_PIN_RESET){
-		  printf("GPIO_PIN_5 was enabled! \n");
+
+	  if(arithmeticADC > (adc_res/2) && HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5) == GPIO_PIN_RESET){
 		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
-		  printf("adc_value == %d \n\r", raw_adc_value);
-		  printf("adc_voltage == %f \n\r", getVoltageFromAdc(&raw_adc_value));
 	  }
-
-	  else if(raw_adc_value <= (adc_res/2) && HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5)!=GPIO_PIN_RESET)
+	  else if(arithmeticADC <= (adc_res/2) && HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5) != GPIO_PIN_RESET)
 	  {
 		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
-		  printf("adc_value == %d \n\r", raw_adc_value);
-		  printf("adc_voltage == %f \n\r", getVoltageFromAdc(&raw_adc_value));
 	  }
+
+	  printf("adc_value == %d \n\r", raw_adc_value);
+	  printf("adc_voltage == %f \n\r", getVoltageFromAdc(&raw_adc_value));
+	  printf("Arithmetic Value == %d \n\n\n\r", arithmeticADC);
+	  HAL_Delay(3600);
 
 
 
