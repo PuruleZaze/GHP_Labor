@@ -50,12 +50,14 @@ UART_HandleTypeDef huart2;
 /* USER CODE BEGIN PV */
 uint16_t raw_adc_value;
 float voltage = 3.3f;
-int adc_res = 4096;
+int adc_res = 4095;
 uint16_t sumADCRaw;
 int arithmeticADC;
-int const cycle = 4;
-int counter = 1;
+//int const cycle = 4;
+#define cycle 4
+int counter = 0;
 uint16_t *adcContainer;
+uint16_t ringBuffer[cycle] = {0};
 
 
 /* USER CODE END PV */
@@ -71,19 +73,20 @@ float getVoltageFromAdc(uint16_t *value){
 	return (*value * voltage) / adc_res;
 }
 
+/*
 int getArithmeticADCValue(uint16_t *adc_raw){
 
-	if(counter > cycle){
-		sumADCRaw += *adc_raw - adcContainer[(counter-(cycle+1)) % cycle];
+	if(counter >= cycle){
+		sumADCRaw += *adc_raw - adcContainer[counter % cycle]; // 5 -> 0, 6 -> 1 ... 7->2, 8->3, 9->0
 	}
 	else{
 		sumADCRaw += *adc_raw;
 	}
 
-	adcContainer[(counter-1)%cycle] = *adc_raw;
+	adcContainer[counter%cycle] = *adc_raw;
 	counter++;
 
-	if(counter > cycle){
+	if(counter-1 >= cycle){
 		return sumADCRaw * 1/cycle;
 	}
 	else{
@@ -91,6 +94,16 @@ int getArithmeticADCValue(uint16_t *adc_raw){
 	}
 
 }
+*/
+int getArithmeticADCValue(uint16_t *adc_raw){
+
+	sumADCRaw += *adc_raw - ringBuffer[counter % cycle];
+	ringBuffer[counter%cycle] = *adc_raw;
+	counter++;
+	return sumADCRaw/cycle;
+}
+
+
 
 void initADCValueContainer(){
 	adcContainer = malloc(sizeof(uint16_t)*cycle);
@@ -175,6 +188,8 @@ int main(void)
 
 	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_SET);
 
+	  // Aufgabe 02
+
 	  if(arithmeticADC > (adc_res/2) && HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5) == GPIO_PIN_RESET){
 		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
 	  }
@@ -186,12 +201,15 @@ int main(void)
 
 	  HAL_Delay(10);
 
-	  if(counter%1000 == 0){
 
+
+	  if(counter%1000 == 0){
 		  printf("adc_value == %d \n\r", raw_adc_value);
 		  printf("adc_voltage == %f \n\r", getVoltageFromAdc(&raw_adc_value));
 		  printf("Arithmetic Value == %d \n\n\n\r", arithmeticADC);
 	  }
+
+
 
 
 
@@ -340,7 +358,7 @@ static void MX_TIM1_Init(void)
   htim1.Instance = TIM1;
   htim1.Init.Prescaler = 64-1;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 4096;
+  htim1.Init.Period = 4095;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
