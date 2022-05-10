@@ -9,17 +9,17 @@ CDefines=USE_HAL_DRIVER;STM32F334x8;USE_HAL_DRIVER;USE_HAL_DRIVER;
 [PreviousGenFiles]
 AdvancedFolderStructure=true
 HeaderFileListSize=3
-HeaderFiles#0=E:/STM/STM_Workspace/GHP_Demo/Core/Inc/stm32f3xx_it.h
-HeaderFiles#1=E:/STM/STM_Workspace/GHP_Demo/Core/Inc/stm32f3xx_hal_conf.h
-HeaderFiles#2=E:/STM/STM_Workspace/GHP_Demo/Core/Inc/main.h
+HeaderFiles#0=C:/Users/cutie/Documents/Projects/GHP_Labor/Core/Inc/stm32f3xx_it.h
+HeaderFiles#1=C:/Users/cutie/Documents/Projects/GHP_Labor/Core/Inc/stm32f3xx_hal_conf.h
+HeaderFiles#2=C:/Users/cutie/Documents/Projects/GHP_Labor/Core/Inc/main.h
 HeaderFolderListSize=1
-HeaderPath#0=E:/STM/STM_Workspace/GHP_Demo/Core/Inc
+HeaderPath#0=C:/Users/cutie/Documents/Projects/GHP_Labor/Core/Inc
 HeaderFiles=;
 SourceFileListSize=3
-SourceFiles#0=E:/STM/STM_Workspace/GHP_Demo/Core/Src/stm32f3xx_it.c
-SourceFiles#1=E:/STM/STM_Workspace/GHP_Demo/Core/Src/stm32f3xx_hal_msp.c
-SourceFiles#2=E:/STM/STM_Workspace/GHP_Demo/Core/Src/main.c
+SourceFiles#0=C:/Users/cutie/Documents/Projects/GHP_Labor/Core/Src/stm32f3xx_it.c
+SourceFiles#1=C:/Users/cutie/Documents/Projects/GHP_Labor/Core/Src/stm32f3xx_hal_msp.c
+SourceFiles#2=C:/Users/cutie/Documents/Projects/GHP_Labor/Core/Src/main.c
 SourceFolderListSize=1
-SourcePath#0=E:/STM/STM_Workspace/GHP_Demo/Core/Src
+SourcePath#0=C:/Users/cutie/Documents/Projects/GHP_Labor/Core/Src
 SourceFiles=;
 
