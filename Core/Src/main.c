@@ -48,15 +48,14 @@ TIM_HandleTypeDef htim1;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-uint16_t raw_adc_value;
-float voltage = 3.3f;
-int adc_res = 4095;
-uint16_t sumADCRaw;
-int arithmeticADC;
-//int const cycle = 4;
 #define cycle 4
+
+uint16_t raw_adc_value = 0;
+const float VOLTAGE = 3.3f;
+const int ADC_RES = 4095;
+uint16_t sumADCRaw = 0;
+int arithmeticADC = 0;
 int counter = 0;
-uint16_t *adcContainer;
 uint16_t ringBuffer[cycle] = {0};
 
 
@@ -70,33 +69,10 @@ static void MX_ADC1_Init(void);
 static void MX_TIM1_Init(void);
 /* USER CODE BEGIN PFP */
 float getVoltageFromAdc(uint16_t *value){
-	return (*value * voltage) / adc_res;
+	return (*value * VOLTAGE) / ADC_RES;
 }
 
-/*
 int getArithmeticADCValue(uint16_t *adc_raw){
-
-	if(counter >= cycle){
-		sumADCRaw += *adc_raw - adcContainer[counter % cycle]; // 5 -> 0, 6 -> 1 ... 7->2, 8->3, 9->0
-	}
-	else{
-		sumADCRaw += *adc_raw;
-	}
-
-	adcContainer[counter%cycle] = *adc_raw;
-	counter++;
-
-	if(counter-1 >= cycle){
-		return sumADCRaw * 1/cycle;
-	}
-	else{
-		return sumADCRaw * 1/(counter-1);
-	}
-
-}
-*/
-int getArithmeticADCValue(uint16_t *adc_raw){
-
 	sumADCRaw += *adc_raw - ringBuffer[counter % cycle];
 	ringBuffer[counter%cycle] = *adc_raw;
 	counter++;
@@ -104,11 +80,13 @@ int getArithmeticADCValue(uint16_t *adc_raw){
 }
 
 
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
 
-void initADCValueContainer(){
-	adcContainer = malloc(sizeof(uint16_t)*cycle);
+	if(GPIO_Pin == B1_Pin)
+		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5); // Toggle The Output (LED) Pin
+
 }
-
 
 /* USER CODE END PFP */
 
@@ -150,7 +128,6 @@ int main(void)
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
 
-  initADCValueContainer();
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
 
   /* USER CODE END 2 */
@@ -159,37 +136,25 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  /*
-	  int x;
-	     for(x=0; x<1000; x=x+1)
-	     {
 
-	       HAL_Delay(1);
-	     }
-	     for(x=1000; x>0; x=x-1)
-	     {
-	       __HAL_TIM_SET_COMPARE(&htim2,TIM_CHANNEL_1, x);
-	       HAL_Delay(1);
-	     }
-	     */
 	  // Aufgabe 01
-	  //HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-	  //HAL_Delay(1000);
-
-
-
-
+	  /*
+	  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+	  HAL_Delay(1000);
+	  */
 
 	  HAL_ADC_Start(&hadc1);
 	  HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
 	  raw_adc_value = HAL_ADC_GetValue(&hadc1);
 	  getVoltageFromAdc(&raw_adc_value);
+
+
 	  arithmeticADC = getArithmeticADCValue(&raw_adc_value);
 
 	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_SET);
 
 	  // Aufgabe 02
-
+	  /*
 	  if(arithmeticADC > (adc_res/2) && HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5) == GPIO_PIN_RESET){
 		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
 	  }
@@ -197,6 +162,8 @@ int main(void)
 	  {
 		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
 	  }
+      */
+	  // Aufgabe 3
 	  __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1, arithmeticADC);
 
 	  HAL_Delay(10);
@@ -356,7 +323,7 @@ static void MX_TIM1_Init(void)
 
   /* USER CODE END TIM1_Init 1 */
   htim1.Instance = TIM1;
-  htim1.Init.Prescaler = 64-1;
+  htim1.Init.Prescaler = 6400-1;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim1.Init.Period = 4095;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -480,6 +447,10 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 }
 
