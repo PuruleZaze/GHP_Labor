@@ -1,0 +1,29 @@
+Welche nachteiligen Effekte bestehen bei der Wahl von großen N (bspw. N={128, 1024})?
+Lange Verzögerung
+
+Welche Vorteile bestehen bei der Mittelwertberechnung unter Benutzung der Rekursionsformel im Vergleich zur Regulären?
+Muss nicht alle werte jedes mal aufaddieren
+
+Wie könnte man das Verhalten der LED-Umschaltung auch einfacher ohne Filter erreichen?
+Zwei-Punktregelung, Genauigkeit verringern
+Wie verhält sich die PWM Steuerung, wenn die Periodendauer des Timers verändert wird (bspw. von 10ms auf 100ms)? 
+Led fängt an zu flackern
+
+Warum erscheint uns die LED als gedimmt (bei 10ms Timerperiode), abhängig vom PWM-Verhältnis? 
+Durch die hohe Frequenz von 100Hz sieht das menschliche Auge die Auszeiten nicht mehr
+
+Wie wäre es möglich, mittels PWM Ausgang das Gegenstück zum ADC zu bauen, also einen DAC (Digital-Analog-Converter)?
+5 V Ausgangsspannung => 2,5 V
+hohe Frequenz 
+PWM Tastverhaältnis von 1:1 => 5ns an, 5ns aus => 2,5V 
+mit tiefpass glätten
+
+
+
+Achten Sie beim Drücken des Tasters darauf, wie die LED toggelt. Wie könnte man das Verhalten verbessern (Entprellung)?
+sleep, tiefpass
+
+Wann wird der Interrupt tatsächlich ausgelöst in Abhängigkeit von Rising bzw. Falling Edge Konfiguration?
+
+falling edge, wenn von 1 auf 0 
+Rising edge, wenn von 0 auf 1

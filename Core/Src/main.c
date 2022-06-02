@@ -154,16 +154,17 @@ int main(void)
 	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_SET);
 
 	  // Aufgabe 02
-	  /*
-	  if(arithmeticADC > (adc_res/2) && HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5) == GPIO_PIN_RESET){
+      /*
+	  if(arithmeticADC > (ADC_RES/2) && HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5) == GPIO_PIN_RESET){
 		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
 	  }
-	  else if(arithmeticADC <= (adc_res/2) && HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5) != GPIO_PIN_RESET)
+	  else if(arithmeticADC <= (ADC_RES/2) && HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5) != GPIO_PIN_RESET)
 	  {
 		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
 	  }
       */
 	  // Aufgabe 3
+
 	  __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1, arithmeticADC);
 
 	  HAL_Delay(10);
@@ -323,7 +324,7 @@ static void MX_TIM1_Init(void)
 
   /* USER CODE END TIM1_Init 1 */
   htim1.Instance = TIM1;
-  htim1.Init.Prescaler = 6400-1;
+  htim1.Init.Prescaler = 64-1;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim1.Init.Period = 4095;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
