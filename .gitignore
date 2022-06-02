@@ -1,4 +1,9 @@
 /Debug
 *.launch
+/.DS_Store
+/.vscode
+/build
+
+
 
 
