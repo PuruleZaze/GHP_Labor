@@ -1,0 +1,1 @@
+void registerTouchSensorTask(void);
