@@ -1,3 +1,4 @@
-idf_component_register(SRCS "mdns.c" "server.c"
+idf_component_register(SRCS "server.c"
                     INCLUDE_DIRS "."
+                    REQUIRES mdns esp_http_server json temperature
                 )

@@ -4,25 +4,25 @@
 #include "esp_chip_info.h"
 #include "esp_random.h"
 #include "esp_log.h"
+#include "esp_event.h"
 #include "esp_vfs.h"
 #include "cJSON.h"
+#include "sdkconfig.h"
+#include "driver/gpio.h"
+#include "esp_netif.h"
+#include "esp_event.h"
+#include "mdns.h"
+#include "lwip/apps/netbiosns.h"
 
 #include "server.h"
+#include "sensor.h"
 
 static const char *REST_TAG = "esp-rest";
 
-#define REST_CHECK(a, str, goto_tag, ...)                                              \
-    do                                                                                 \
-    {                                                                                  \
-        if (!(a))                                                                      \
-        {                                                                              \
-            ESP_LOGE(REST_TAG, "%s(%d): " str, __FUNCTION__, __LINE__, ##__VA_ARGS__); \
-            goto goto_tag;                                                             \
-        }                                                                              \
-    } while (0)
-
 #define FILE_PATH_MAX (ESP_VFS_PATH_MAX + 128)
 #define SCRATCH_BUFSIZE (10240)
+
+#define MDNS_INSTANCE "esp home web server"
 
 typedef struct rest_server_context
 {
@@ -50,7 +50,7 @@ static esp_err_t temperature_data_get_handler(httpd_req_t *req)
 {
     httpd_resp_set_type(req, "application/json");
     cJSON *root = cJSON_CreateObject();
-    cJSON_AddNumberToObject(root, "raw", esp_random() % 20);
+    cJSON_AddNumberToObject(root, "raw", readTemp());
     const char *sys_info = cJSON_Print(root);
     httpd_resp_sendstr(req, sys_info);
     free((void *)sys_info);
@@ -93,26 +93,21 @@ static esp_err_t light_brightness_post_handler(httpd_req_t *req)
     return ESP_OK;
 }
 
-esp_err_t start_rest_server(const char *base_path)
+esp_err_t start_rest_server()
 {
-    REST_CHECK(base_path, "wrong base path", err);
-    rest_server_context_t *rest_context = calloc(1, sizeof(rest_server_context_t));
-    REST_CHECK(rest_context, "No memory for rest context", err);
-    strlcpy(rest_context->base_path, base_path, sizeof(rest_context->base_path));
-
     httpd_handle_t server = NULL;
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     config.uri_match_fn = httpd_uri_match_wildcard;
 
     ESP_LOGI(REST_TAG, "Starting HTTP Server");
-    REST_CHECK(httpd_start(&server, &config) == ESP_OK, "Start server failed", err_start);
+    ESP_ERROR_CHECK(httpd_start(&server, &config));
 
     /* URI handler for fetching system info */
     httpd_uri_t system_info_get_uri = {
         .uri = "/api/v1/system/info",
         .method = HTTP_GET,
         .handler = system_info_get_handler,
-        .user_ctx = rest_context};
+        .user_ctx = NULL};
     httpd_register_uri_handler(server, &system_info_get_uri);
 
     /* URI handler for fetching temperature data */
@@ -120,7 +115,7 @@ esp_err_t start_rest_server(const char *base_path)
         .uri = "/api/v1/temp/raw",
         .method = HTTP_GET,
         .handler = temperature_data_get_handler,
-        .user_ctx = rest_context};
+        .user_ctx = NULL};
     httpd_register_uri_handler(server, &temperature_data_get_uri);
 
     /* URI handler for light brightness control */
@@ -128,26 +123,30 @@ esp_err_t start_rest_server(const char *base_path)
         .uri = "/api/v1/light/brightness",
         .method = HTTP_POST,
         .handler = light_brightness_post_handler,
-        .user_ctx = rest_context};
+        .user_ctx = NULL};
     httpd_register_uri_handler(server, &light_brightness_post_uri);
     return ESP_OK;
-
-err_start:
-    free(rest_context);
-err:
-    return ESP_FAIL;
 }
 
+void initialise_mdns(void)
+{
+    mdns_init();
+    mdns_hostname_set(CONFIG_EXAMPLE_MDNS_HOST_NAME);
+    mdns_instance_name_set(MDNS_INSTANCE);
+
+    mdns_txt_item_t serviceTxtData[] = {
+        {"board", "esp32"},
+        {"path", "/"}};
+
+    ESP_ERROR_CHECK(mdns_service_add("ESP32-WebServer", "_http", "_tcp", 80, serviceTxtData,
+                                     sizeof(serviceTxtData) / sizeof(serviceTxtData[0])));
+}
 
 void init_webserver(void)
 {
-    ESP_ERROR_CHECK(nvs_flash_init());
     ESP_ERROR_CHECK(esp_netif_init());
-    ESP_ERROR_CHECK(esp_event_loop_create_default());
     initialise_mdns();
     netbiosns_init();
     netbiosns_set_name(CONFIG_EXAMPLE_MDNS_HOST_NAME);
-
-    ESP_ERROR_CHECK(example_connect());
     ESP_ERROR_CHECK(start_rest_server());
 }
