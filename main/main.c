@@ -19,7 +19,7 @@ void app_main()
         ret = nvs_flash_init();
     }
     ESP_ERROR_CHECK(ret);
-
+    ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(i2cdev_init());
 
     wifi_init_sta();

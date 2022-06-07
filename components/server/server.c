@@ -144,7 +144,6 @@ void initialise_mdns(void)
 
 void init_webserver(void)
 {
-    ESP_ERROR_CHECK(esp_netif_init());
     initialise_mdns();
     netbiosns_init();
     netbiosns_set_name(CONFIG_EXAMPLE_MDNS_HOST_NAME);
