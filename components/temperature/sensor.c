@@ -10,7 +10,7 @@
 #define APP_CPU_NUM PRO_CPU_NUM
 #endif
 
-static float x1 = 0.0;
+static float temp_int = 0.0;
 
 void bmp280_test(void *pvParameters)
 {
@@ -40,18 +40,14 @@ void bmp280_test(void *pvParameters)
          * sdkconfig for ESP8266, which is enabled by default for this
          * example. see sdkconfig.defaults.esp8266
          */
-        x1 = temperature;
-        printf("Pressure: %.2f Pa, Temperature: %.2f C", pressure, temperature);
-        if (bme280p)
-            printf(", Humidity: %.2f\n", humidity);
-        else
-            printf("\n");
+        temp_int = temperature;
+        printf("Pressure: %.2f Pa, Temperature: %.2f C\n", pressure, temperature);
     }
 }
 
 
 float readTemp(){
-   return x1;
+   return temp_int;
 }
 
 
