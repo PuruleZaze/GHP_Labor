@@ -13,7 +13,7 @@
 
 #include "touch.h"
 
-#define LED_GPIO GPIO_NUM_5
+#define LED_GPIO GPIO_NUM_2
 #define TOUCH_NUM 4
 #define TOUCH_THRESH_NO_USE (0)
 #define TOUCH_THRESH_PERCENT (80)
