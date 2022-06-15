@@ -148,6 +148,15 @@ CONFIG_ESP_WIFI_AUTH_OPEN=y
 # end of Example configuration
 
 #
+# Time Configuration
+#
+CONFIG_SNTP_TIME_SERVER="pool.ntp.org"
+CONFIG_SNTP_TIME_SYNC_METHOD_IMMED=y
+# CONFIG_SNTP_TIME_SYNC_METHOD_SMOOTH is not set
+# CONFIG_SNTP_TIME_SYNC_METHOD_CUSTOM is not set
+# end of Time Configuration
+
+#
 # Compiler options
 #
 CONFIG_COMPILER_OPTIMIZATION_DEFAULT=y

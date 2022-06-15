@@ -4,6 +4,7 @@
 #include <esp_system.h>
 #include <esp_log.h>
 #include <bmp280.h>
+#include <time.h>
 #include <string.h>
 #include "sensor.h"
 
@@ -44,7 +45,13 @@ void bmp280_test(void *pvParameters)
        * example. see sdkconfig.defaults.esp8266
        */
       temp_int = temperature;
-      ESP_LOGI(TAG, "Pressure: %.2f Pa, Temperature: %.2f C\n", pressure, temperature);
+      time_t now;
+      struct tm timeinfo;
+      time(&now);
+      localtime_r(&now, &timeinfo);
+      char strftime_buf[64];
+      strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
+      ESP_LOGI(TAG, "%s : Pressure: %.2f Pa, Temperature: %.2f C\n", strftime_buf, pressure, temperature);
    }
 }
 

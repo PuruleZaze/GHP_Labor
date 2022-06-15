@@ -5,10 +5,12 @@
 #include <bmp280.h>
 #include "nvs_flash.h"
 #include <string.h>
+#include "esp_netif.h"
 
 #include "sensor.h"
 #include "wifi.h"
 #include "server.h"
+#include "sys_time.h"
 
 void app_main()
 {
@@ -23,6 +25,8 @@ void app_main()
     ESP_ERROR_CHECK(i2cdev_init());
 
     wifi_init_sta();
+
+    setup_time();
     xTaskCreatePinnedToCore(bmp280_test, "bmp280_test", configMINIMAL_STACK_SIZE * 8, NULL, 5, NULL, APP_CPU_NUM);
     init_webserver();
 }
