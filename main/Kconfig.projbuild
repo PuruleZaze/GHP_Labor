@@ -1,0 +1,10 @@
+menu "System Timer Counter"
+
+    config TIMER_HELLO_WORLD
+        int "Warning timer"
+        range 0 10
+        default 0
+        help
+            Set warning timer
+
+endmenu

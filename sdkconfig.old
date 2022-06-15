@@ -129,10 +129,10 @@ CONFIG_PARTITION_TABLE_MD5=y
 # end of Partition Table
 
 #
-# System Timer Counter
+# Main Config
 #
-CONFIG_TIMER_HELLO_WORLD=10
-# end of System Timer Counter
+CONFIG_TIMER_HELLO_WORLD=5
+# end of Main Config
 
 #
 # Compiler options

@@ -1,71 +1,52 @@
-# _LEDC Fade Example_
+# Hello World Example
+
+Starts a FreeRTOS task to print "Hello World".
 
 (See the README.md file in the upper level 'examples' directory for more information about examples.)
 
-This example shows how to control intensity of LEDs using ESP32's on-board hardware LED PWM Controller module.
-
 ## How to use example
 
-### Hardware Required
+Follow detailed instructions provided specifically for this example. 
 
-* A development board with ESP32 SoC (e.g., ESP32-DevKitC, ESP-WROVER-KIT, etc.)
-* A USB cable for power supply and programming
+Select the instructions depending on Espressif chip installed on your development board:
 
-Connect four LEDs to the following LEDC channels / individual GPIOs:
+- [ESP32 Getting Started Guide](https://docs.espressif.com/projects/esp-idf/en/stable/get-started/index.html)
+- [ESP32-S2 Getting Started Guide](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s2/get-started/index.html)
 
-|ledc channel|GPIO|
-|:---:|:---:|
-|channel 0|GPIO18|
-|channel 1|GPIO19|
-|channel 2|GPIO4|
-|channel 3|GPIO5|
 
-### Configure the project
+## Example folder contents
 
-```
-idf.py menuconfig
-```
+The project **hello_world** contains one source file in C language [hello_world_main.c](main/hello_world_main.c). The file is located in folder [main](main).
 
-### Build and Flash
+ESP-IDF projects are built using CMake. The project build configuration is contained in `CMakeLists.txt` files that provide set of directives and instructions describing the project's source files and targets (executable, library, or both). 
 
-* [ESP-IDF Getting Started Guide on ESP32](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/index.html)
-* [ESP-IDF Getting Started Guide on ESP32-S2](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s2/get-started/index.html)
-* [ESP-IDF Getting Started Guide on ESP32-C3](https://docs.espressif.com/projects/esp-idf/en/latest/esp32c3/get-started/index.html)
-
-Build the project and flash it to the board, then run monitor tool to view serial output:
+Below is short explanation of remaining files in the project folder.
 
 ```
-idf.py -p PORT flash monitor
+├── CMakeLists.txt
+├── example_test.py            Python script used for automated example testing
+├── main
+│   ├── CMakeLists.txt
+│   ├── component.mk           Component make file
+│   └── hello_world_main.c
+├── Makefile                   Makefile used by legacy GNU Make
+└── README.md                  This is the file you are currently reading
 ```
 
-(To exit the serial monitor, type ``Ctrl-]``.)
-
-See the Getting Started Guide for full steps to configure and use ESP-IDF to build projects.
-
-## Example Output
-
-Running this example, you will see each ledc's brightness changes differently
-
-* LEDC 1: Fade up / increase intensity
-* LEDC 2: Fade down / decrease intensity
-* LEDC 3: Keep a stable intensity
-* LEDC 4: LED is not on
-
-you can also see the following output log on the serial monitor:
-
-```
-1. LEDC fade up to duty = 4000
-2. LEDC fade down to duty = 0
-3. LEDC set duty = 4000 without fade
-4. LEDC set duty = 0 without fade
-...
-```
+For more information on structure and contents of ESP-IDF projects, please refer to Section [Build System](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/build-system.html) of the ESP-IDF Programming Guide.
 
 ## Troubleshooting
 
-* Programming fail
+* Program upload failure
 
     * Hardware connection is not correct: run `idf.py -p PORT monitor`, and reboot your board to see if there are any output logs.
     * The baud rate for downloading is too high: lower your baud rate in the `menuconfig` menu, and try again.
 
-For any technical queries, please open an [issue](https://github.com/espressif/esp-idf/issues) on GitHub. We will get back to you soon.
+## Technical support and feedback
+
+Please use the following feedback channels:
+
+* For technical queries, go to the [esp32.com](https://esp32.com/) forum
+* For a feature request or bug report, create a [GitHub issue](https://github.com/espressif/esp-idf/issues)
+
+We will get back to you as soon as possible.
