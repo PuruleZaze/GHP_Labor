@@ -2,6 +2,7 @@
 #include <fcntl.h>
 #include "esp_http_server.h"
 #include "esp_chip_info.h"
+#include <driver/gpio.h>
 #include "esp_random.h"
 #include "esp_log.h"
 #include "esp_event.h"
@@ -26,7 +27,6 @@ static const char *REST_TAG = "esp-rest";
 
 typedef struct rest_server_context
 {
-    char base_path[ESP_VFS_PATH_MAX + 1];
     char scratch[SCRATCH_BUFSIZE];
 } rest_server_context_t;
 
@@ -84,10 +84,12 @@ static esp_err_t light_brightness_post_handler(httpd_req_t *req)
     buf[total_len] = '\0';
 
     cJSON *root = cJSON_Parse(buf);
-    int red = cJSON_GetObjectItem(root, "red")->valueint;
-    int green = cJSON_GetObjectItem(root, "green")->valueint;
-    int blue = cJSON_GetObjectItem(root, "blue")->valueint;
-    ESP_LOGI(REST_TAG, "Light control: red = %d, green = %d, blue = %d", red, green, blue);
+    bool power = cJSON_GetObjectItem(root, "power")->valueint;
+
+    ESP_LOGI(REST_TAG, "Light control: %d", power);
+
+    gpio_set_level(GPIO_NUM_5, (uint8_t)power);
+
     cJSON_Delete(root);
     httpd_resp_sendstr(req, "Post control value successfully");
     return ESP_OK;
@@ -95,6 +97,10 @@ static esp_err_t light_brightness_post_handler(httpd_req_t *req)
 
 esp_err_t start_rest_server()
 {
+
+    gpio_set_direction(GPIO_NUM_5, GPIO_MODE_OUTPUT);
+    rest_server_context_t *rest_context = calloc(1, sizeof(rest_server_context_t));
+
     httpd_handle_t server = NULL;
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     config.uri_match_fn = httpd_uri_match_wildcard;
@@ -120,10 +126,10 @@ esp_err_t start_rest_server()
 
     /* URI handler for light brightness control */
     httpd_uri_t light_brightness_post_uri = {
-        .uri = "/api/v1/light/brightness",
+        .uri = "/api/v1/led/power",
         .method = HTTP_POST,
         .handler = light_brightness_post_handler,
-        .user_ctx = NULL};
+        .user_ctx = rest_context};
     httpd_register_uri_handler(server, &light_brightness_post_uri);
     return ESP_OK;
 }
