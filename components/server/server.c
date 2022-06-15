@@ -23,6 +23,9 @@ static const char *REST_TAG = "esp-rest";
 #define FILE_PATH_MAX (ESP_VFS_PATH_MAX + 128)
 #define SCRATCH_BUFSIZE (10240)
 
+#define BLINK_GPIO CONFIG_BLINK_GPIO
+
+
 #define MDNS_INSTANCE "esp home web server"
 
 typedef struct rest_server_context
@@ -88,7 +91,7 @@ static esp_err_t light_brightness_post_handler(httpd_req_t *req)
 
     ESP_LOGI(REST_TAG, "Light control: %d", power);
 
-    gpio_set_level(GPIO_NUM_5, (uint8_t)power);
+    gpio_set_level(BLINK_GPIO, (uint8_t)power);
 
     cJSON_Delete(root);
     httpd_resp_sendstr(req, "Post control value successfully");
@@ -98,7 +101,7 @@ static esp_err_t light_brightness_post_handler(httpd_req_t *req)
 esp_err_t start_rest_server()
 {
 
-    gpio_set_direction(GPIO_NUM_5, GPIO_MODE_OUTPUT);
+    gpio_set_direction(BLINK_GPIO, GPIO_MODE_OUTPUT);
     rest_server_context_t *rest_context = calloc(1, sizeof(rest_server_context_t));
 
     httpd_handle_t server = NULL;
