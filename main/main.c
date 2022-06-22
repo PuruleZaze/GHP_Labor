@@ -24,9 +24,15 @@ void app_main()
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(i2cdev_init());
 
+    //establish wifi connection
     wifi_init_sta();
 
+    // get time via sntp
     setup_time();
+
+    // start reading time
     xTaskCreatePinnedToCore(bmp280_test, "bmp280_test", configMINIMAL_STACK_SIZE * 8, NULL, 5, NULL, APP_CPU_NUM);
+
+    // start rest api
     init_webserver();
 }
