@@ -26,7 +26,7 @@ struct tm * timeinfo;
 int counter = 0;
 
 
-
+// Task 01 - Get the current systemtime
 void getSystemTime_Task01(void *pvParameters){
     int messageFromQueue;
     for(;;){
@@ -36,15 +36,18 @@ void getSystemTime_Task01(void *pvParameters){
         
         vTaskDelay(1000 / portTICK_PERIOD_MS);
         counter++;
+        // @CONFIG_TIMER_HELLO_WORLD is defined in the 'Kconfig.projbuild' -> user can set this value in the menu. (range 0~10)
         if(counter%CONFIG_TIMER_HELLO_WORLD == 0){
             ESP_LOGW(TAG, "Running on core: %d", xPortGetCoreID());
             ESP_LOGW(TAG, "Es sind %d Sekunden vergangen!", CONFIG_TIMER_HELLO_WORLD);
+            // reads a message from the message queue and log the value as a warning
             xQueueReceive(queue, &messageFromQueue, 0);
             ESP_LOGW(TAG, "Read message from queue: %d", messageFromQueue);
         }
     } 
 }
 
+// Task 02 - Sends a messsage to the message queue and increment the value
 void writeToQueue_Task02(void *pvParameters){
     int messageForQueue = (int) pvParameters;
     for(;;){
@@ -57,6 +60,9 @@ void writeToQueue_Task02(void *pvParameters){
 void app_main(void)
 {
     queue = xQueueCreate(1, sizeof(int));
-    xTaskCreate(getSystemTime_Task01, "task_1", 4096, NULL, tskIDLE_PRIORITY, &task1_handler);
-    xTaskCreate(writeToQueue_Task02, "task_2", 4096, ((void *) 42),  tskIDLE_PRIORITY, &task2_handler);
+    // Creates a tasks on core 0 with no params
+    xTaskCreatePinnedToCore(getSystemTime_Task01, "task_1", 4096, NULL, tskIDLE_PRIORITY, &task1_handler, 0);
+    // Creates a tasks on core 1 with params
+    xTaskCreatePinnedToCore(writeToQueue_Task02, "task_2", 4096, ((void *) 42),  tskIDLE_PRIORITY, &task2_handler, 1);
 } 
+
