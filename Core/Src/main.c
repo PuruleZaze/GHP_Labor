@@ -68,10 +68,17 @@ static void MX_USART2_UART_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_TIM1_Init(void);
 /* USER CODE BEGIN PFP */
+
+/*
+  Returns the Voltage from the current ADC Value
+*/
 float getVoltageFromAdc(uint16_t *value){
 	return (*value * VOLTAGE) / ADC_RES;
 }
 
+/*
+  Implementation of moving average
+*/  
 int getArithmeticADCValue(uint16_t *adc_raw){
 	sumADCRaw += *adc_raw - ringBuffer[counter % cycle];
 	ringBuffer[counter%cycle] = *adc_raw;
@@ -79,7 +86,9 @@ int getArithmeticADCValue(uint16_t *adc_raw){
 	return sumADCRaw/cycle;
 }
 
-
+/*
+  Interrupt handler calles this function to toggle the LED 
+*/
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
 
@@ -138,7 +147,7 @@ int main(void)
   {
 
 	  // Aufgabe 01
-	  /*
+	  /* 
 	  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
 	  HAL_Delay(1000);
 	  */
@@ -148,13 +157,14 @@ int main(void)
 	  raw_adc_value = HAL_ADC_GetValue(&hadc1);
 	  getVoltageFromAdc(&raw_adc_value);
 
-
 	  arithmeticADC = getArithmeticADCValue(&raw_adc_value);
 
 	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_SET);
 
-	  // Aufgabe 02
-      /*
+
+
+	  // Aufgabe 02 - Turns on the led -> depends on the current ADC value
+    /* 
 	  if(arithmeticADC > (ADC_RES/2) && HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5) == GPIO_PIN_RESET){
 		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
 	  }
@@ -162,15 +172,15 @@ int main(void)
 	  {
 		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
 	  }
-      */
-	  // Aufgabe 3
+    */
 
+
+	  // Aufgabe 3 - PWM generation
 	  __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1, arithmeticADC);
-
 	  HAL_Delay(10);
 
 
-
+    // Serial output -> print the values
 	  if(counter%1000 == 0){
 		  printf("adc_value == %d \n\r", raw_adc_value);
 		  printf("adc_voltage == %f \n\r", getVoltageFromAdc(&raw_adc_value));
@@ -456,6 +466,7 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+// Enables the serial output
 int __io_putchar(int ch)
 	  {
 	   uint8_t c[1];
