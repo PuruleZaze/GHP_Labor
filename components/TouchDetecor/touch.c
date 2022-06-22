@@ -39,6 +39,7 @@ static void tp_example_set_thresholds(void)
 void vTaskTouchDetector(void *pvParameters)
 {
     static int show_message;
+    // remember if led is on or off
     static bool ledOn;
     while (1)
     {
@@ -48,6 +49,7 @@ void vTaskTouchDetector(void *pvParameters)
         if (s_pad_activated == true)
         {
             ESP_LOGI(TAG, "T%d activated!", TOUCH_NUM);
+            // toggle led
             if (ledOn)
                 gpio_set_level(LED_GPIO, 0);
             else
@@ -73,6 +75,7 @@ static void tp_example_rtc_intr(void *arg)
     uint32_t pad_intr = touch_pad_get_status();
     // clear interrupt
     touch_pad_clear_status();
+    // check if sensor is on
     if ((pad_intr >> TOUCH_NUM) & 0x01)
     {
         s_pad_activated = true;

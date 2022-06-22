@@ -18,6 +18,7 @@
 #define LEDC_TEST_DUTY (4000)
 #define LEDC_TEST_FADE_TIME (3000)
 
+// notification that fade is finished via semaphore
 static bool cb_ledc_fade_end_event(const ledc_cb_param_t *param, void *user_arg)
 {
     portBASE_TYPE taskAwoken = pdFALSE;
@@ -33,6 +34,7 @@ static bool cb_ledc_fade_end_event(const ledc_cb_param_t *param, void *user_arg)
 
 void vTaskFadeLed(void *pvParameters)
 {
+    // setup timer for pwm generation
     ledc_timer_config_t ledc_timer = {
         .duty_resolution = LEDC_TIMER_13_BIT,
         .freq_hz = 5000,
@@ -42,6 +44,7 @@ void vTaskFadeLed(void *pvParameters)
     };
     ledc_timer_config(&ledc_timer);
 
+    // setup channel for ledc
     ledc_channel_config_t ledc_channel = {
         .channel = LEDC_HS_CH0_CHANNEL,
         .duty = 0,
@@ -57,7 +60,9 @@ void vTaskFadeLed(void *pvParameters)
     ledc_fade_func_install(0);
 
     ledc_cbs_t callbacks = {
-        .fade_cb = cb_ledc_fade_end_event};
+        .fade_cb = cb_ledc_fade_end_event,
+    };
+
     SemaphoreHandle_t counting_sem = xSemaphoreCreateCounting(LEDC_TEST_CH_NUM, 0);
 
     ledc_cb_register(ledc_channel.speed_mode, ledc_channel.channel, &callbacks, (void *)counting_sem);
@@ -70,6 +75,7 @@ void vTaskFadeLed(void *pvParameters)
         ledc_fade_start(ledc_channel.speed_mode,
                         ledc_channel.channel, LEDC_FADE_NO_WAIT);
 
+        // wait till fade is over and semaphore is available
         xSemaphoreTake(counting_sem, portMAX_DELAY);
 
         printf("2. LEDC fade down to duty = 0\n");
@@ -78,6 +84,7 @@ void vTaskFadeLed(void *pvParameters)
         ledc_fade_start(ledc_channel.speed_mode,
                         ledc_channel.channel, LEDC_FADE_NO_WAIT);
 
+        // wait till fade is over and semaphore is available
         xSemaphoreTake(counting_sem, portMAX_DELAY);
     }
 }
